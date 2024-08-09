@@ -1,7 +1,7 @@
 <?php
 # FileName="connect.php"
 $hostname = "localhost";
-$database = "NEP_Calculator";
+$database = "nep_calculator";
 $username = "root";
 $password = "";
 
