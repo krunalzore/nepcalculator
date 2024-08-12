@@ -3,43 +3,54 @@ include 'connect.php';
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+header('Content-Type: application/json'); // Ensure content type is JSON
+
 $data = [];
 $totalcredits = 0;
 
-$op = $_POST['subname'];
-$selectedCourses = explode(',', $op);
+$op = $_POST['subname'] ?? null;
+$program = $_POST['program'] ?? null;
+$semester = $_POST['semester'] ?? null;
 
-// Initialize an array to hold debug messages
-$debugMessages = [];
+if (!$op || !$program || !$semester) {
+    echo json_encode(['error' => 'Missing required parameters']);
+    exit;
+}
+
+$selectedCourses = explode(',', $op);
 
 foreach ($selectedCourses as $course) {
     $course = trim($course); // Trim to avoid any leading/trailing spaces
-    $sql = mysqli_query($conn, "SELECT COURSE_NAME, CREDIT FROM complete_syllabus WHERE COURSE_NAME='$course'");
 
-    // Check if the query returns any results
+    $sql = mysqli_query($conn, "SELECT COURSE_NAME, CREDIT FROM complete_syllabus WHERE COURSE_NAME = '$course' AND PROG_NAME = '$program' AND SEM = '$semester'");
+
     if (!$sql) {
-        $debugMessages[] = "Query Error for $course: " . mysqli_error($conn);
-    } else if (mysqli_num_rows($sql) === 0) {
-        $debugMessages[] = "No results found for course: $course";
-    }
-
-    while ($resf = mysqli_fetch_assoc($sql)) {
-        $credits = $resf['CREDIT'];
         $data[] = [
-            "course" => $course,
-            "credits" => $credits
+            "course" => "Error for $course",
+            "credits" => "N/A"
         ];
-        $totalcredits += $credits;
+    } else if (mysqli_num_rows($sql) === 0) {
+        $data[] = [
+            "course" => "$course not found in $program, Semester $semester",
+            "credits" => "N/A"
+        ];
+    } else {
+        while ($resf = mysqli_fetch_assoc($sql)) {
+            $credits = $resf['CREDIT'];
+            $data[] = [
+                "course" => $resf['COURSE_NAME'],
+                "credits" => $credits
+            ];
+            $totalcredits += $credits;
+        }
     }
 }
 
-// Adding total credits to the response
+// Adding total credits to the response after processing all courses
 $data[] = [
     "course" => "Total Credits",
     "credits" => $totalcredits
 ];
 
-
-// Encode the final response as JSON
 echo json_encode($data);
 ?>

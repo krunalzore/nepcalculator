@@ -63,7 +63,7 @@ $programs_result = $conn->query($programs_query);
             </div>
             <div class="text-center mt-8">
               
-                <button type="button" id="submitCC" class="bg-green-500 text-white px-4 py-2 rounded-md ml-4">Submit to CC</button>
+                <button type="button" id="submitCC" class="bg-green-500 text-white px-4 py-2 rounded-md ml-4">Next</button>
             </div>
         </form>
     </div>
